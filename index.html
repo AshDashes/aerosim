@@ -33,18 +33,22 @@ async def custom_site():
 
     # the C or js loader could do that but be explicit.
     appdir = Path(f"/data/data/{bundle}") # /data/data/aerosim
-    appdir.mkdir()
+    if appdir.exists():
+        import shutil
+        shutil.rmtree(appdir, ignore_errors=True)
+    appdir.mkdir(parents=True, exist_ok=True)
 
+    cache_bust = f"?v={int(platform.window.Date.now())}"
 
     # unpack filesystem from compressed archive into work dir
     if platform.window.location.host.find('.itch.zone')>0:
         import zipfile
-        async with platform.fopen("aerosim.apk", "rb") as archive:
+        async with platform.fopen(f"aerosim.apk{cache_bust}", "rb") as archive:
             with zipfile.ZipFile(archive) as zip_ref:
                 zip_ref.extractall(appdir.as_posix())
     else:
         import tarfile
-        async with platform.fopen("aerosim.tar.gz", "rb") as archive:
+        async with platform.fopen(f"aerosim.tar.gz{cache_bust}", "rb") as archive:
             tar = tarfile.open(fileobj=archive, mode="r:gz")
             tar.extractall(path=appdir.as_posix(), filter='tar')
             tar.close()
