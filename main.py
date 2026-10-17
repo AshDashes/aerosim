@@ -66,8 +66,16 @@ class agent:
 class app:
     def __init__(self):
         pygame.init()
-        pygame.mixer.init()
-        make_sounds()
+        try:
+            pygame.mixer.init()
+        except Exception:
+            pass
+
+        if not os.path.exists("alarm.wav"):
+            try:
+                make_sounds()
+            except Exception:
+                pass
         
         self.screen = pygame.display.set_mode((1000, 700))
         pygame.display.set_caption("AeroSim")
@@ -102,12 +110,26 @@ class app:
         self.sim_gear = True
         self.flaps_options = ["Retracted", "Takeoff(15°)", "Landing(30°)"]
 
-        self.sound_engine = pygame.mixer.Sound("engine.wav")
-        self.sound_alarm = pygame.mixer.Sound("alarm.wav")
-        self.sound_crash = pygame.mixer.Sound("crash.wav")
-        self.sound_click = pygame.mixer.Sound("click.wav")
-        self.channel_engine = pygame.mixer.Channel(0)
-        self.channel_alarm = pygame.mixer.Channel(1)
+        class DummyChannel:
+            def play(self, *a, **k): pass
+            def stop(self): pass
+            def set_volume(self, *a): pass
+            def get_busy(self): return False
+
+        try:
+            self.sound_engine = pygame.mixer.Sound("engine.wav")
+            self.sound_alarm = pygame.mixer.Sound("alarm.wav")
+            self.sound_crash = pygame.mixer.Sound("crash.wav")
+            self.sound_click = pygame.mixer.Sound("click.wav")
+            self.channel_engine = pygame.mixer.Channel(0)
+            self.channel_alarm = pygame.mixer.Channel(1)
+        except Exception:
+            self.sound_engine = DummyChannel()
+            self.sound_alarm = DummyChannel()
+            self.sound_crash = DummyChannel()
+            self.sound_click = DummyChannel()
+            self.channel_engine = DummyChannel()
+            self.channel_alarm = DummyChannel()
         self.crash_triggered = False
 
         self.population = []
@@ -789,5 +811,4 @@ async def main():
     game = app()
     await game.run()
 
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
