@@ -1,4 +1,5 @@
 import math
+import random 
 
 class physics:
     def __init__(self):
@@ -24,10 +25,12 @@ class physics:
         self.ek = 0.0
         self.eg = 0.0
         self.work_done = 0.0
-        
+    
         if active_settings:
             self.fuel = active_settings.fuel
             self.wind_speed = active_settings.wind_speed * 0.514
+            self.turbulence = active_settings.turbulence
+            self.rho_sea_level = active_settings.air_density
 
             if active_settings.planet == "Earth":
                 self.g = 9.81
@@ -41,6 +44,8 @@ class physics:
             self.g = 9.81
             self.wind_speed = 0.0
             self.fuel = 50.0
+            self.turbulence = 0.0
+            self.rho_sea_level = 1.225
 
     def phy_calc(self, throttle, pitch_deg, flaps, gear_down):
         if self.fuel > 0.0:
@@ -53,10 +58,15 @@ class physics:
         weight = self.mass * self.g
         v_air_x = self.vx + self.wind_speed
         v_air_y = self.vy
+
+        if self.turbulence > 0.0:
+            v_air_x += random.uniform(-self.turbulence, self.turbulence)
+            v_air_y += random.uniform(-self.turbulence * 0.7, self.turbulence * 0.7)
+            
         v = math.sqrt(v_air_x**2 + v_air_y**2)
 
         if self.g == 9.81:
-            rho = 1.225 * math.exp(-self.y / 8500.0)
+            rho = self.rho_sea_level * math.exp(-self.y / 8500.0)
 
         elif self.g == 3.71:
             rho = 0.02 * math.exp(-self.y / 11000.0)
