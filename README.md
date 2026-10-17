@@ -1,4 +1,4 @@
-# AeroSim - An Interactive 2-D Flight Simulator! 
+# AeroSim - An Interactive 2-D Flight Simulator
 
 > **Play Live in Browser (WebAssembly)**: [https://ashdashes.github.io/aerosim/](https://ashdashes.github.io/aerosim/)
 
