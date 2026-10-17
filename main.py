@@ -144,6 +144,17 @@ class app:
         self.best_live_agent = None
         self.weather_loading = False
 
+        self.bg_images = {}
+        for p in ["Earth", "Mars", "Moon"]:
+            fname = f"bg_{p.lower()}.png"
+            if os.path.exists(fname):
+                try:
+                    self.bg_images[p] = pygame.image.load(fname).convert()
+                except Exception:
+                    self.bg_images[p] = None
+            else:
+                self.bg_images[p] = None
+
     async def run(self):
         while self.running:
             self.handle_events()
@@ -187,30 +198,30 @@ class app:
     def handle_click(self, pos):
         mx, my = pos
         if self.state == "MENU":
-            if 400 <= mx <= 600 and 110 <= my <= 160:
+            if 360 <= mx <= 640 and 110 <= my <= 160:
                 self.sound_click.play()
                 self.state = "STARTUP"
                 self.physics.reset(self.settings)
-            elif 400 <= mx <= 600 and 175 <= my <= 225:
+            elif 360 <= mx <= 640 and 175 <= my <= 225:
                 self.sound_click.play()
                 self.start_training()
-            elif 400 <= mx <= 600 and 240 <= my <= 290:
+            elif 360 <= mx <= 640 and 240 <= my <= 290:
                 self.sound_click.play()
                 idx = self.planets.index(self.settings.planet)
                 self.settings.planet = self.planets[(idx + 1) % len(self.planets)]
-            elif 400 <= mx <= 600 and 305 <= my <= 355:
+            elif 360 <= mx <= 640 and 305 <= my <= 355:
                 self.sound_click.play()
                 idx = self.winds.index(self.settings.wind_speed)
                 self.settings.wind_speed = self.winds[(idx + 1) % len(self.winds)]
-            elif 400 <= mx <= 600 and 370 <= my <= 420:
+            elif 360 <= mx <= 640 and 370 <= my <= 420:
                 self.sound_click.play()
                 idx = self.turbulences.index(self.settings.turbulence)
                 self.settings.turbulence = self.turbulences[(idx + 1) % len(self.turbulences)]
-            elif 400 <= mx <= 600 and 435 <= my <= 485:
+            elif 360 <= mx <= 640 and 435 <= my <= 485:
                 self.sound_click.play()
                 idx = self.noises.index(self.settings.sensor_noise)
                 self.settings.sensor_noise = self.noises[(idx + 1) % len(self.noises)]
-            elif 400 <= mx <= 600 and 500 <= my <= 550:
+            elif 360 <= mx <= 640 and 500 <= my <= 550:
                 if not self.weather_loading:
                     self.sound_click.play()
                     idx = self.weather_locations.index(self.settings.weather_location)
@@ -225,7 +236,7 @@ class app:
                             t.start()
                         except Exception:
                             self.load_weather_thread(loc)
-            elif 400 <= mx <= 600 and 565 <= my <= 615:
+            elif 360 <= mx <= 640 and 565 <= my <= 615:
                 self.sound_click.play()
                 try:
                     import platform
@@ -413,18 +424,18 @@ class app:
     def draw_menu(self):
         title = self.font_title.render("AeroSim - Flight Dynamics Lab", True, COLOR_TEXT)
         self.screen.blit(title, (1000/2 - title.get_width()/2, 50))
-        self.draw_btn("Manual Flight", 400, 110, 200, 50, COLOR_UI)
-        self.draw_btn("Train AI Autopilot", 400, 175, 200, 50, COLOR_ACCENT)
-        self.draw_btn(f"Planet: {self.settings.planet}", 400, 240, 200, 50, COLOR_PANEL)
-        self.draw_btn(f"Wind: {int(self.settings.wind_speed)} kt", 400, 305, 200, 50, COLOR_PANEL)
-        self.draw_btn(f"Turbulence: {self.settings.turbulence} m/s", 400, 370, 200, 50, COLOR_PANEL)
-        self.draw_btn(f"Sensor Noise: {int(self.settings.sensor_noise * 100)}%", 400, 435, 200, 50, COLOR_PANEL)
+        self.draw_btn("Manual Flight", 360, 110, 280, 50, COLOR_UI)
+        self.draw_btn("Train AI Autopilot", 360, 175, 280, 50, COLOR_ACCENT)
+        self.draw_btn(f"Planet: {self.settings.planet}", 360, 240, 280, 50, COLOR_PANEL)
+        self.draw_btn(f"Wind: {int(self.settings.wind_speed)} kt", 360, 305, 280, 50, COLOR_PANEL)
+        self.draw_btn(f"Turbulence: {self.settings.turbulence} m/s", 360, 370, 280, 50, COLOR_PANEL)
+        self.draw_btn(f"Sensor Noise: {int(self.settings.sensor_noise * 100)}%", 360, 435, 280, 50, COLOR_PANEL)
         if self.weather_loading:
             weather_text = f"Weather: {self.settings.weather_location} [LOADING...]"
         else:
             weather_text = f"Weather: {self.settings.weather_location} ({self.settings.air_density:.3f})"
-        self.draw_btn(weather_text, 400, 500, 200, 50, COLOR_PANEL)
-        self.draw_btn("Exit", 400, 565, 200, 50, COLOR_ACCENT)
+        self.draw_btn(weather_text, 360, 500, 280, 50, COLOR_PANEL)
+        self.draw_btn("Exit", 360, 565, 280, 50, COLOR_ACCENT)
 
     def draw_btn(self, text, x, y, w, h, color):
         pygame.draw.rect(self.screen, color, (x, y, w, h), border_radius=5)
@@ -486,15 +497,6 @@ class app:
 
     def draw_sim(self):
         pygame.draw.rect(self.screen, COLOR_PANEL, (0, 0, 1000, 320))
-        status_txt = self.font_ui.render(f"Status: {self.physics.status}", True, COLOR_TEXT)
-        self.screen.blit(status_txt, (460, 20))
-        controls_txt = self.font_ui.render(
-            f"Throttle: {int(self.sim_throttle)}% | Pitch: {int(self.sim_pitch)}° | Flaps: {self.sim_flaps} | Gear: {'DOWN' if self.sim_gear else 'UP'}",
-            True, COLOR_TEXT
-        )
-        self.screen.blit(controls_txt, (460, 50))
-        nav_txt = self.font_gauge.render("Press 'M' to Return to Menu | 'R' to Reset Runway", True, COLOR_WHITE)
-        self.screen.blit(nav_txt, (460, 80))
 
         v_total = math.sqrt(self.physics.vx**2 + self.physics.vy**2)
         self.draw_dial("AIRSPEED", 110, 100, 48, v_total * 1.944, 160)
@@ -506,16 +508,47 @@ class app:
         vy_ftmin = self.physics.vy * 196.85
         self.draw_vsi_dial("V. SPEED", 370, 220, 48, vy_ftmin, 2000)
 
-        self.draw_energy_hud(750, 95)
+        tx, ty, tw, th = 445, 45, 275, 230
+        pygame.draw.rect(self.screen, COLOR_BG, (tx, ty, tw, th), border_radius=5)
+        pygame.draw.rect(self.screen, COLOR_UI, (tx, ty, tw, th), 2, border_radius=5)
+        pnl_title = self.font_ui.render("FLIGHT CONTROLS", True, COLOR_TEXT)
+        self.screen.blit(pnl_title, (tx + tw/2 - pnl_title.get_width()/2, ty + 12))
+        pygame.draw.line(self.screen, COLOR_UI, (tx + 15, ty + 40), (tx + tw - 15, ty + 40), 1)
+
+        status_color = COLOR_ACCENT if ("CRASH" in self.physics.status.upper() or "STALL" in self.physics.status.upper()) else COLOR_WHITE
+        lbl_stat = self.font_ui.render(f"Status: {self.physics.status}", True, status_color)
+        self.screen.blit(lbl_stat, (tx + 18, ty + 50))
+
+        lbl_throt = self.font_gauge.render(f"Throttle: {int(self.sim_throttle)}%", True, COLOR_TEXT)
+        lbl_pitch = self.font_gauge.render(f"Pitch: {self.sim_pitch:+.1f}°", True, COLOR_TEXT)
+        lbl_flaps = self.font_gauge.render(f"Flaps: {self.sim_flaps}", True, COLOR_WHITE)
+        lbl_gear = self.font_gauge.render(f"Gear: {'DOWN' if self.sim_gear else 'UP'}", True, COLOR_WHITE)
+
+        self.screen.blit(lbl_throt, (tx + 18, ty + 80))
+        self.screen.blit(lbl_pitch, (tx + 145, ty + 80))
+        self.screen.blit(lbl_flaps, (tx + 18, ty + 105))
+        self.screen.blit(lbl_gear, (tx + 145, ty + 105))
+
+        pygame.draw.line(self.screen, COLOR_UI, (tx + 15, ty + 135), (tx + tw - 15, ty + 135), 1)
+        hint_ctrls = self.font_gauge.render("[▲/▼] Throttle  |  [◄/►] Pitch", True, COLOR_TEXT)
+        hint_flaps = self.font_gauge.render("[F] Flaps Cycle |  [G] Landing Gear", True, COLOR_TEXT)
+        hint_menu = self.font_gauge.render("Press [M] for Menu | [R] Reset", True, COLOR_ACCENT)
+
+        self.screen.blit(hint_ctrls, (tx + 18, ty + 145))
+        self.screen.blit(hint_flaps, (tx + 18, ty + 170))
+        self.screen.blit(hint_menu, (tx + 18, ty + 195))
+
+        self.draw_energy_hud(735, 45)
 
         ground_y = 660
-        pygame.draw.rect(self.screen, (27, 42, 74), (0, 320, 1000, 340))
-        pygame.draw.rect(self.screen, (45, 58, 75), (0, ground_y, 1000, 40))
-        pygame.draw.ellipse(self.screen, COLOR_PANEL, (100, 360, 120, 40))
-        pygame.draw.ellipse(self.screen, COLOR_PANEL, (450, 400, 180, 50))
-        pygame.draw.ellipse(self.screen, COLOR_PANEL, (750, 350, 140, 45))
-        for r_x in range(0, 1000, 50):
-            pygame.draw.line(self.screen, COLOR_WHITE, (r_x, ground_y + 15), (r_x + 25, ground_y + 15), 2)
+        bg = self.bg_images.get(self.settings.planet)
+        if bg:
+            self.screen.blit(bg, (0, 320))
+        else:
+            pygame.draw.rect(self.screen, (27, 42, 74), (0, 320, 1000, 340))
+            pygame.draw.rect(self.screen, (45, 58, 75), (0, ground_y, 1000, 40))
+            for r_x in range(0, 1000, 50):
+                pygame.draw.line(self.screen, COLOR_WHITE, (r_x, ground_y + 15), (r_x + 25, ground_y + 15), 2)
 
         self.draw_environment_hud()
 
@@ -552,21 +585,6 @@ class app:
 
     def draw_training(self):
         pygame.draw.rect(self.screen, COLOR_PANEL, (0, 0, 1000, 320))
-        
-        pygame.draw.rect(self.screen, COLOR_BG, (750, 95, 220, 150), border_radius=5)
-        pygame.draw.rect(self.screen, COLOR_UI, (750, 95, 220, 150), 2, border_radius=5)
-        
-        gen_lbl = self.font_ui.render(f"Gen: {self.generation}", True, COLOR_TEXT)
-        best_lbl = self.font_gauge.render(f"Best Fitness: {self.best_fitness:.1f}", True, COLOR_WHITE)
-        time_lbl = self.font_gauge.render(f"Time: {self.train_timer/60:.1f}s / 25s", True, COLOR_TEXT)
-        alive_lbl = self.font_ui.render(f"Alive: {len([a for a in self.population if not a.is_dead])} / 15", True, COLOR_ACCENT)
-        reset_lbl = self.font_gauge.render("Press 'R' to Exit Training", True, COLOR_WHITE)
-
-        self.screen.blit(gen_lbl, (760, 110))
-        self.screen.blit(best_lbl, (760, 140))
-        self.screen.blit(time_lbl, (760, 160))
-        self.screen.blit(alive_lbl, (760, 185))
-        self.screen.blit(reset_lbl, (760, 215))
 
         leader = self.best_live_agent
         if leader:
@@ -579,24 +597,64 @@ class app:
             self.draw_forces_for_agent(240, 220, leader)
             vy_ftmin = leader.physics.vy * 196.85
             self.draw_vsi_dial("V. SPEED", 370, 220, 48, vy_ftmin, 2000)
-            
-            status_txt = self.font_ui.render(f"Leader: {leader.physics.status}", True, COLOR_TEXT)
-            self.screen.blit(status_txt, (460, 20))
-            controls_txt = self.font_ui.render(
-                f"T: {int(leader.throttle)}% | P: {int(leader.pitch)}° | Fit: {leader.fitness:.1f}",
-                True, COLOR_TEXT
-            )
-            self.screen.blit(controls_txt, (460, 50))
         else:
             self.draw_dial("AIRSPEED", 110, 100, 48, 0, 160)
             self.draw_dial("ALTITUDE", 370, 100, 48, 0, 3000)
             self.draw_vsi_dial("V. SPEED", 370, 220, 48, 0, 2000)
 
+        tx, ty, tw, th = 445, 45, 275, 230
+        pygame.draw.rect(self.screen, COLOR_BG, (tx, ty, tw, th), border_radius=5)
+        pygame.draw.rect(self.screen, COLOR_UI, (tx, ty, tw, th), 2, border_radius=5)
+        pnl_title = self.font_ui.render("LEADER TELEMETRY", True, COLOR_TEXT)
+        self.screen.blit(pnl_title, (tx + tw/2 - pnl_title.get_width()/2, ty + 12))
+        pygame.draw.line(self.screen, COLOR_UI, (tx + 15, ty + 40), (tx + tw - 15, ty + 40), 1)
+
+        if leader:
+            lbl_stat = self.font_ui.render(f"Status: {leader.physics.status}", True, COLOR_WHITE)
+            lbl_throt = self.font_gauge.render(f"Throttle: {int(leader.throttle)}%", True, COLOR_TEXT)
+            lbl_pitch = self.font_gauge.render(f"Pitch: {leader.pitch:+.1f}°", True, COLOR_TEXT)
+            lbl_fit = self.font_gauge.render(f"Live Fitness: {leader.fitness:.1f}", True, COLOR_ACCENT)
+            lbl_dist = self.font_gauge.render(f"Distance: {leader.physics.x:.1f} m", True, COLOR_WHITE)
+            lbl_alt = self.font_gauge.render(f"Altitude: {leader.physics.y * 3.281:.0f} ft", True, COLOR_WHITE)
+
+            self.screen.blit(lbl_stat, (tx + 18, ty + 50))
+            self.screen.blit(lbl_throt, (tx + 18, ty + 78))
+            self.screen.blit(lbl_pitch, (tx + 145, ty + 78))
+            self.screen.blit(lbl_dist, (tx + 18, ty + 103))
+            self.screen.blit(lbl_alt, (tx + 145, ty + 103))
+            self.screen.blit(lbl_fit, (tx + 18, ty + 128))
+
+        pygame.draw.line(self.screen, COLOR_UI, (tx + 15, ty + 155), (tx + tw - 15, ty + 155), 1)
+        hint_exit = self.font_gauge.render("Press [M] or [R] to Exit Training", True, COLOR_ACCENT)
+        self.screen.blit(hint_exit, (tx + 18, ty + 175))
+
+        rx, ry, rw, rh = 735, 45, 245, 230
+        pygame.draw.rect(self.screen, COLOR_BG, (rx, ry, rw, rh), border_radius=5)
+        pygame.draw.rect(self.screen, COLOR_UI, (rx, ry, rw, rh), 2, border_radius=5)
+        ea_title = self.font_ui.render("GENETIC MONITOR", True, COLOR_TEXT)
+        self.screen.blit(ea_title, (rx + rw/2 - ea_title.get_width()/2, ry + 12))
+        pygame.draw.line(self.screen, COLOR_UI, (rx + 15, ry + 40), (rx + rw - 15, ry + 40), 1)
+
+        gen_lbl = self.font_gauge.render(f"Generation: {self.generation}", True, COLOR_TEXT)
+        best_lbl = self.font_gauge.render(f"Best Fitness: {self.best_fitness:.1f}", True, COLOR_WHITE)
+        time_lbl = self.font_gauge.render(f"Eval Time: {self.train_timer/60:.1f}s / 25s", True, COLOR_TEXT)
+        alive_count = len([a for a in self.population if not a.is_dead])
+        alive_lbl = self.font_ui.render(f"Alive: {alive_count} / 15", True, COLOR_ACCENT)
+
+        self.screen.blit(gen_lbl, (rx + 18, ry + 55))
+        self.screen.blit(best_lbl, (rx + 18, ry + 82))
+        self.screen.blit(time_lbl, (rx + 18, ry + 110))
+        self.screen.blit(alive_lbl, (rx + 18, ry + 145))
+
         ground_y = 660
-        pygame.draw.rect(self.screen, (27, 42, 74), (0, 320, 1000, 340))
-        pygame.draw.rect(self.screen, (45, 58, 75), (0, ground_y, 1000, 40))
-        for r_x in range(0, 1000, 50):
-            pygame.draw.line(self.screen, COLOR_WHITE, (r_x, ground_y + 15), (r_x + 25, ground_y + 15), 2)
+        bg = self.bg_images.get(self.settings.planet)
+        if bg:
+            self.screen.blit(bg, (0, 320))
+        else:
+            pygame.draw.rect(self.screen, (27, 42, 74), (0, 320, 1000, 340))
+            pygame.draw.rect(self.screen, (45, 58, 75), (0, ground_y, 1000, 40))
+            for r_x in range(0, 1000, 50):
+                pygame.draw.line(self.screen, COLOR_WHITE, (r_x, ground_y + 15), (r_x + 25, ground_y + 15), 2)
 
         self.draw_environment_hud()
 
@@ -671,15 +729,30 @@ class app:
         pygame.draw.circle(self.screen, COLOR_WHITE, (cx, cy), 3)
 
     def draw_attitude_gyro(self, cx, cy, r, pitch_val):
-        pygame.draw.circle(self.screen, COLOR_BG, (cx, cy), r)
+        surf = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
         pitch_offset = int((pitch_val / 20.0) * (r - 5))
-        pygame.draw.circle(self.screen, COLOR_UI, (cx, cy), r)
-        pygame.draw.rect(self.screen, COLOR_ACCENT, (cx - r, cy + pitch_offset, r * 2, r - pitch_offset + 5))
-        pygame.draw.line(self.screen, COLOR_WHITE, (cx - r + 3, cy + pitch_offset), (cx + r - 3, cy + pitch_offset), 2)
-        pygame.draw.circle(self.screen, COLOR_TEXT, (cx, cy), r, 2)
-        pygame.draw.line(self.screen, COLOR_WHITE, (cx - 12, cy), (cx - 4, cy), 2)
-        pygame.draw.line(self.screen, COLOR_WHITE, (cx + 4, cy), (cx + 12, cy), 2)
-        pygame.draw.circle(self.screen, COLOR_WHITE, (cx, cy), 2)
+        pitch_offset = max(-r + 2, min(r - 2, pitch_offset))
+
+        pygame.draw.circle(surf, COLOR_UI, (r, r), r)
+
+        ground_surf = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
+        pygame.draw.rect(ground_surf, COLOR_ACCENT, (0, r + pitch_offset, r * 2, r * 2))
+        mask_surf = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
+        pygame.draw.circle(mask_surf, (255, 255, 255, 255), (r, r), r)
+        ground_surf.blit(mask_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+        surf.blit(ground_surf, (0, 0))
+
+        y_rel = pitch_offset
+        if -r < y_rel < r:
+            x_half = int(math.sqrt(max(0, r * r - y_rel * y_rel)))
+            pygame.draw.line(surf, COLOR_WHITE, (r - x_half, r + y_rel), (r + x_half, r + y_rel), 2)
+
+        pygame.draw.circle(surf, COLOR_TEXT, (r, r), r, 2)
+        pygame.draw.line(surf, COLOR_WHITE, (r - 12, r), (r - 4, r), 2)
+        pygame.draw.line(surf, COLOR_WHITE, (r + 4, r), (r + 12, r), 2)
+        pygame.draw.circle(surf, COLOR_WHITE, (r, r), 2)
+
+        self.screen.blit(surf, (cx - r, cy - r))
         txt = self.font_gauge.render("ATTITUDE", True, COLOR_TEXT)
         self.screen.blit(txt, (cx - txt.get_width()/2, cy - r - 13))
 
@@ -701,22 +774,35 @@ class app:
         pygame.draw.circle(self.screen, COLOR_ACCENT, (ball_x, cy + 23), 4)
 
     def draw_energy_hud(self, x, y):
-        pygame.draw.rect(self.screen, COLOR_BG, (x - 10, y - 10, 220, 150), border_radius=5)
-        pygame.draw.rect(self.screen, COLOR_UI, (x - 10, y - 10, 220, 150), 2, border_radius=5)
+        w, h = 245, 230
+        pygame.draw.rect(self.screen, COLOR_BG, (x, y, w, h), border_radius=5)
+        pygame.draw.rect(self.screen, COLOR_UI, (x, y, w, h), 2, border_radius=5)
+        title = self.font_ui.render("ENERGY COMPUTER", True, COLOR_TEXT)
+        self.screen.blit(title, (x + w/2 - title.get_width()/2, y + 12))
+        pygame.draw.line(self.screen, COLOR_UI, (x + 15, y + 40), (x + w - 15, y + 40), 1)
+
         work_kj = self.physics.work_done / 1000.0
         ek_kj = self.physics.ek / 1000.0
         eg_kj = self.physics.eg / 1000.0
         total_energy = ek_kj + eg_kj
-        lbl_w = self.font_gauge.render(f"Work: {work_kj:.1f} kJ", True, COLOR_TEXT)
-        lbl_ek = self.font_gauge.render(f"Ek: {ek_kj:.1f} kJ", True, COLOR_TEXT)
-        lbl_eg = self.font_gauge.render(f"Eg: {eg_kj:.1f} kJ", True, COLOR_TEXT)
-        lbl_tot = self.font_gauge.render(f"Total E: {total_energy:.1f} kJ", True, COLOR_WHITE)
+
+        lbl_w = self.font_gauge.render(f"Work Done: {work_kj:.1f} kJ", True, COLOR_TEXT)
+        lbl_ek = self.font_gauge.render(f"Kinetic (Ek): {ek_kj:.1f} kJ", True, COLOR_WHITE)
+        lbl_eg = self.font_gauge.render(f"Potential (Eg): {eg_kj:.1f} kJ", True, COLOR_WHITE)
+        lbl_tot = self.font_gauge.render(f"Total Energy: {total_energy:.1f} kJ", True, COLOR_TEXT)
+
+        self.screen.blit(lbl_w, (x + 18, y + 55))
+        self.screen.blit(lbl_ek, (x + 18, y + 80))
+        self.screen.blit(lbl_eg, (x + 18, y + 105))
+        self.screen.blit(lbl_tot, (x + 18, y + 130))
+
+        pygame.draw.line(self.screen, COLOR_UI, (x + 15, y + 160), (x + w - 15, y + 160), 1)
         lbl_fuel = self.font_ui.render(f"Fuel: {self.physics.fuel:.1f} L", True, COLOR_ACCENT)
-        self.screen.blit(lbl_w, (x, y))
-        self.screen.blit(lbl_ek, (x, y + 20))
-        self.screen.blit(lbl_eg, (x, y + 40))
-        self.screen.blit(lbl_tot, (x, y + 60))
-        self.screen.blit(lbl_fuel, (x, y + 90))
+        self.screen.blit(lbl_fuel, (x + 18, y + 170))
+
+        fuel_ratio = max(0.0, min(1.0, self.physics.fuel / 50.0))
+        pygame.draw.rect(self.screen, COLOR_PANEL, (x + 18, y + 200, w - 36, 12), border_radius=3)
+        pygame.draw.rect(self.screen, COLOR_ACCENT, (x + 18, y + 200, int((w - 36) * fuel_ratio), 12), border_radius=3)
 
     def draw_forces(self, cx, cy):
         t_val = self.sim_throttle / 100.0
@@ -799,7 +885,7 @@ class app:
             self.screen.blit(lbl, (int(end_x + off_x - lbl.get_width()/2), int(end_y + off_y - lbl.get_height()/2)))
 
     def draw_environment_hud(self):
-        pygame.draw.rect(self.screen, COLOR_PANEL, (830, 340, 150, 120), border_radius=5)
+        pygame.draw.rect(self.screen, COLOR_BG, (830, 340, 150, 120), border_radius=5)
         pygame.draw.rect(self.screen, COLOR_UI, (830, 340, 150, 120), 2, border_radius=5)
         
         lbl_title = self.font_gauge.render("ENVIRONMENT", True, COLOR_TEXT)
@@ -833,12 +919,13 @@ async def main():
     game = app()
     await game.run()
 
-try:
-    loop = asyncio.get_running_loop()
-except RuntimeError:
-    loop = None
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
 
-if loop and loop.is_running():
-    asyncio.create_task(main())
-else:
-    asyncio.run(main())
+    if loop and loop.is_running():
+        asyncio.create_task(main())
+    else:
+        asyncio.run(main())
