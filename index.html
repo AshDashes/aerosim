@@ -6,7 +6,7 @@ Loading aerosim from aerosim.apk
     Template Version : 0.9.3
     Python  : 3.12
     CDN URL : https://pygame-web.github.io/cdn/0.9.3/
-    Screen  : 1280x720
+    Screen  : 1000x700
     Title   : aerosim
     Folder  : aerosim
     Authors : pgw
@@ -23,7 +23,7 @@ from pathlib import Path
 # do not rename
 async def custom_site():
     import embed
-    platform.document.body.style.background = "#7f7f7f"
+    platform.document.body.style.background = "#0f0f11"
 
     platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
@@ -148,17 +148,17 @@ config = {
     _sdl2 : "canvas",
     user_canvas : 0,
     user_canvas_managed : 0,
-    gui_divider : 2,
+    gui_divider : 1,
     ume_block : 1,
     can_close : 0,
     archive : "aerosim",
-    gui_debug : 2,
+    gui_debug : 0,
     cdn : "https://pygame-web.github.io/cdn/0.9.3/",
     autorun : 0,
     PYBUILD : "3.12",
-    fb_ar   :  1.77,
-    fb_width : "1280",
-    fb_height : "720"
+    fb_ar   :  1.42857,
+    fb_width : "1000",
+    fb_height : "700"
 }
 
 function show_infobox() {
@@ -205,13 +205,18 @@ function show_infobox() {
         }
 
         #infobox {
-            position: fixed; /* center relative to viewport */
-            background: green;
-            color: blue;
+            position: fixed;
+            background: #1f293a;
+            color: #ebb49b;
+            border: 2px solid #384c6b;
+            border-radius: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-weight: bold;
-            padding: 12px 24px;
- /*           display: none; */
+            font-size: 16px;
+            padding: 14px 28px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             z-index: 999999;
+            cursor: pointer;
         }
         div.emscripten { text-align: center; }
         div.emscripten_border { border: 1px solid black; }
@@ -237,10 +242,10 @@ function show_infobox() {
         }
 
         body {
-            font-family: arial;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: none;
-            background-color:powderblue;
+            padding: 0;
+            background-color: #0f0f11;
         }
 
         .topright{
@@ -301,14 +306,14 @@ function show_infobox() {
 
 
     <canvas class="emscripten" id="canvas"
-width="1px"
-height="1px"
+width="1000px"
+height="700px"
     oncontextmenu="event.preventDefault()" tabindex=1>
     </canvas>
 
     <canvas class="emscripten" id="canvas3d"
-width="1280px"
-height="720px"
+width="1000px"
+height="700px"
     oncontextmenu="event.preventDefault()" tabindex=1 hidden>
     </canvas>
 
