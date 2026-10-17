@@ -1,5 +1,7 @@
 # AeroSim - An Interactive 2-D Flight Simulator! 
 
+> **Play Live in Browser (WebAssembly)**: [https://ashdashes.github.io/aerosim/](https://ashdashes.github.io/aerosim/)
+
 ## Key Features:
 ### 1. First-Principles Flight Dynamics (`physics.py`)
 * **4-Force Vector Resolution**: Computes real-time continuous vectors for Lift, Induced & Parasitic Drag, Engine Thrust, and Gravitational Weight.
@@ -47,4 +49,5 @@
 * **Pitch Nose Up / Down**: `Right Arrow` / `Left Arrow`
 * **Cycle Flaps**: `F` (`Retracted` -> `Takeoff 15°` -> `Landing 30°`)
 * **Toggle Landing Gear**: `G` (`UP` / `DOWN`)
-* **Reset / Return to Menu**: `R`
+* **Reset Runway**: `R`
+* **Return to Main Menu**: `M`
