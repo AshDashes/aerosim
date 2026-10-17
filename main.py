@@ -1,4 +1,5 @@
 import pygame
+import asyncio
 import math
 import os
 import wave
@@ -116,12 +117,13 @@ class app:
         self.best_live_agent = None
         self.weather_loading = False
 
-    def run(self):
+    async def run(self):
         while self.running:
             self.handle_events()
             self.update()
             self.draw()
             self.clock.tick(60)
+            await asyncio.sleep(0)
         pygame.quit()
 
     def handle_events(self):
@@ -182,9 +184,12 @@ class app:
                     if loc == "Standard":
                         self.settings.air_density = 1.225
                     else:
-                        import threading
-                        t = threading.Thread(target=self.load_weather_thread, args=(loc,))
-                        t.start()
+                        try:
+                            import threading
+                            t = threading.Thread(target=self.load_weather_thread, args=(loc,))
+                            t.start()
+                        except Exception:
+                            self.load_weather_thread(loc)
             elif 400 <= mx <= 600 and 565 <= my <= 615:
                 self.sound_click.play()
                 self.running = False
@@ -780,6 +785,9 @@ class app:
             lbl_wind = self.font_gauge.render("Wind: Calm", True, COLOR_WHITE)
             self.screen.blit(lbl_wind, (840, 430))
 
-if __name__ == "__main__":
+async def main():
     game = app()
-    game.run()
+    await game.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
