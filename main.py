@@ -227,13 +227,14 @@ class app:
                             self.load_weather_thread(loc)
             elif 400 <= mx <= 600 and 565 <= my <= 615:
                 self.sound_click.play()
-                self.running = False
                 try:
                     import platform
-                    if hasattr(platform, "window"):
-                        platform.window.eval("window.open('', '_self', ''); window.close(); setTimeout(function() { window.location.href = 'https://github.com/AshDashes/aerosim'; }, 300);")
+                    if hasattr(platform, "window") and hasattr(platform.window, "exit_app"):
+                        platform.window.exit_app()
+                        return
                 except Exception:
                     pass
+                self.running = False
         elif self.state == "STARTUP":
             if 410 <= mx <= 540 and 200 <= my <= 280:
                 self.sound_click.play()
