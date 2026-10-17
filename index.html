@@ -437,6 +437,16 @@ frameborder="1"
         window.frames["iframe"].location = url;
     }
 
+    function exit_app() {
+        try {
+            window.open('', '_self', '');
+            window.close();
+        } catch (e) {}
+        setTimeout(function() {
+            window.location.href = "https://github.com/AshDashes/aerosim";
+        }, 150);
+    }
+
     </script>
 
 </body>
