@@ -93,9 +93,14 @@ class app:
         self.noises = [0.0, 0.05, 0.10]
         self.weather_locations = ["Standard", "CYYZ", "KORD", "EGLL"]
         
-        self.font_title = pygame.font.SysFont("Arial", 40, True)
-        self.font_ui = pygame.font.SysFont("Arial", 20, True)
-        self.font_gauge = pygame.font.SysFont("Arial", 12, True)
+        try:
+            self.font_title = pygame.font.SysFont("Arial", 40, True)
+            self.font_ui = pygame.font.SysFont("Arial", 20, True)
+            self.font_gauge = pygame.font.SysFont("Arial", 12, True)
+        except Exception:
+            self.font_title = pygame.font.Font(None, 40)
+            self.font_ui = pygame.font.Font(None, 24)
+            self.font_gauge = pygame.font.Font(None, 16)
 
         self.switch_battery = False
         self.switch_alternator = False
@@ -811,4 +816,12 @@ async def main():
     game = app()
     await game.run()
 
-asyncio.run(main())
+try:
+    loop = asyncio.get_running_loop()
+except RuntimeError:
+    loop = None
+
+if loop and loop.is_running():
+    asyncio.create_task(main())
+else:
+    asyncio.run(main())
