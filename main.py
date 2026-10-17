@@ -2,8 +2,6 @@ import pygame
 import asyncio
 import math
 import os
-import wave
-import struct
 import random
 from settings import settings
 from physics import physics
@@ -18,6 +16,8 @@ COLOR_TEXT = (235, 180, 155)
 COLOR_WHITE = (255, 255, 255)
 
 def make_sounds():
+    import wave
+    import struct
     def save_wav(name, data):
         with wave.open(name, "w") as f:
             f.setnchannels(1)
