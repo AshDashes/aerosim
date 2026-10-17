@@ -228,6 +228,12 @@ class app:
             elif 400 <= mx <= 600 and 565 <= my <= 615:
                 self.sound_click.play()
                 self.running = False
+                try:
+                    import platform
+                    if hasattr(platform, "window"):
+                        platform.window.eval("window.open('', '_self', ''); window.close(); setTimeout(function() { window.location.href = 'https://github.com/AshDashes/aerosim'; }, 300);")
+                except Exception:
+                    pass
         elif self.state == "STARTUP":
             if 410 <= mx <= 540 and 200 <= my <= 280:
                 self.sound_click.play()
