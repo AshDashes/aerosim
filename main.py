@@ -171,10 +171,18 @@ class app:
                         self.sim_gear = not self.sim_gear
                     elif event.key == pygame.K_r:
                         self.reset_sim()
-                elif self.state == "TRAINING":
-                    if event.key == pygame.K_r:
+                    elif event.key == pygame.K_m or event.key == pygame.K_ESCAPE:
+                        self.sound_click.play()
                         self.state = "MENU"
                         self.channel_engine.stop()
+                        self.channel_alarm.stop()
+                elif self.state == "TRAINING":
+                    if event.key == pygame.K_r or event.key == pygame.K_m:
+                        self.state = "MENU"
+                        self.channel_engine.stop()
+                elif self.state == "STARTUP":
+                    if event.key == pygame.K_m or event.key == pygame.K_ESCAPE:
+                        self.state = "MENU"
 
     def handle_click(self, pos):
         mx, my = pos
@@ -478,6 +486,8 @@ class app:
             True, COLOR_TEXT
         )
         self.screen.blit(controls_txt, (460, 50))
+        nav_txt = self.font_gauge.render("Press 'M' to Return to Menu | 'R' to Reset Runway", True, COLOR_WHITE)
+        self.screen.blit(nav_txt, (460, 80))
 
         v_total = math.sqrt(self.physics.vx**2 + self.physics.vy**2)
         self.draw_dial("AIRSPEED", 110, 100, 48, v_total * 1.944, 160)
