@@ -25,6 +25,11 @@ class physics:
         self.ek = 0.0
         self.eg = 0.0
         self.work_done = 0.0
+        self.gust_x = 0.0
+        self.gust_y = 0.0
+        self.target_gust_x = 0.0
+        self.target_gust_y = 0.0
+        self.gust_timer = 0.0
     
         if active_settings:
             self.fuel = active_settings.fuel
@@ -56,13 +61,8 @@ class physics:
             self.status = "Engine Off (No Fuel)"
 
         weight = self.mass * self.g
-        v_air_x = self.vx + self.wind_speed
-        v_air_y = self.vy
-
-        if self.turbulence > 0.0:
-            v_air_x += random.uniform(-self.turbulence, self.turbulence)
-            v_air_y += random.uniform(-self.turbulence * 0.7, self.turbulence * 0.7)
-            
+        v_air_x = self.vx + self.wind_speed + self.gust_x
+        v_air_y = self.vy + self.gust_y
         v = math.sqrt(v_air_x**2 + v_air_y**2)
 
         if self.g == 9.81:
@@ -114,6 +114,19 @@ class physics:
         return tx, ty, lx, ly, dx, dy, weight, thrust, v
 
     def update(self, dt, throttle, pitch_deg, flaps, gear_down):
+        if self.turbulence > 0.0:
+            self.gust_timer -= dt
+            if self.gust_timer <= 0.0:
+                self.target_gust_x = random.uniform(-self.turbulence, self.turbulence)
+                self.target_gust_y = random.uniform(-self.turbulence * 0.7, self.turbulence * 0.7)
+                self.gust_timer = random.uniform(0.8, 1.8)
+            alpha = min(1.0, 3.0 * dt)
+            self.gust_x += (self.target_gust_x - self.gust_x) * alpha
+            self.gust_y += (self.target_gust_y - self.gust_y) * alpha
+        else:
+            self.gust_x = 0.0
+            self.gust_y = 0.0
+
         tx, ty, lx, ly, dx, dy, weight, thrust_force, v_air = self.phy_calc(throttle, pitch_deg, flaps, gear_down)
         if self.fuel > 0.0:
             self.fuel -= throttle * 0.1 * dt
