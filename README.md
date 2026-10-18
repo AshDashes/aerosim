@@ -2,6 +2,11 @@
 
 > **Play Live in Browser (WebAssembly)**: [https://ashdashes.github.io/aerosim/](https://ashdashes.github.io/aerosim/)
 
+<img width="800" alt="AeroSim Flight Simulator Demo" src="https://github.com/user-attachments/assets/320c9545-b194-4301-86e5-b50ae65da28e" />
+
+
+**AeroSim** is a custom 2D flight simulator built from scratch in Python. It features custom-coded aerodynamics, real-time stall physics, and live FAA weather integration to model authentic flight conditions. It also includes an evolutionary neural network autopilot capable of learning flight control across Earth, Mars, and the Moon—fully playable in-browser or locally on desktop.
+
 ## Key Features:
 ### 1. First-Principles Flight Dynamics (`physics.py`)
 * **4-Force Vector Resolution**: Computes real-time continuous vectors for Lift, Induced & Parasitic Drag, Engine Thrust, and Gravitational Weight.
