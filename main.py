@@ -143,6 +143,7 @@ class app:
         self.train_timer = 0
         self.best_live_agent = None
         self.weather_loading = False
+        self.earth_air_density = 1.225
 
         self.bg_images = {}
         for p in ["Earth", "Mars", "Moon"]:
@@ -209,6 +210,12 @@ class app:
                 self.sound_click.play()
                 idx = self.planets.index(self.settings.planet)
                 self.settings.planet = self.planets[(idx + 1) % len(self.planets)]
+                if self.settings.planet == "Earth":
+                    self.settings.air_density = self.earth_air_density
+                elif self.settings.planet == "Mars":
+                    self.settings.air_density = 0.020
+                elif self.settings.planet == "Moon":
+                    self.settings.air_density = 0.000
             elif 360 <= mx <= 640 and 305 <= my <= 355:
                 self.sound_click.play()
                 idx = self.winds.index(self.settings.wind_speed)
@@ -222,13 +229,16 @@ class app:
                 idx = self.noises.index(self.settings.sensor_noise)
                 self.settings.sensor_noise = self.noises[(idx + 1) % len(self.noises)]
             elif 360 <= mx <= 640 and 500 <= my <= 550:
-                if not self.weather_loading:
+                if self.settings.planet != "Earth":
+                    pass
+                elif not self.weather_loading:
                     self.sound_click.play()
                     idx = self.weather_locations.index(self.settings.weather_location)
                     loc = self.weather_locations[(idx + 1) % len(self.weather_locations)]
                     self.settings.weather_location = loc
                     if loc == "Standard":
                         self.settings.air_density = 1.225
+                        self.earth_air_density = 1.225
                     else:
                         try:
                             import threading
@@ -317,7 +327,9 @@ class app:
     def load_weather_thread(self, loc):
         self.weather_loading = True
         density = get_live_density(loc)
-        self.settings.air_density = density
+        self.earth_air_density = density
+        if self.settings.planet == "Earth":
+            self.settings.air_density = density
         self.weather_loading = False
 
     def update(self):
@@ -430,11 +442,19 @@ class app:
         self.draw_btn(f"Wind: {int(self.settings.wind_speed)} kt", 360, 305, 280, 50, COLOR_PANEL)
         self.draw_btn(f"Turbulence: {self.settings.turbulence} m/s", 360, 370, 280, 50, COLOR_PANEL)
         self.draw_btn(f"Sensor Noise: {int(self.settings.sensor_noise * 100)}%", 360, 435, 280, 50, COLOR_PANEL)
-        if self.weather_loading:
-            weather_text = f"Weather: {self.settings.weather_location} [LOADING...]"
+        if self.settings.planet == "Mars":
+            weather_text = "Weather: N/A (Mars)"
+            btn_color = (60, 64, 75)
+        elif self.settings.planet == "Moon":
+            weather_text = "Weather: N/A (Vacuum)"
+            btn_color = (60, 64, 75)
         else:
-            weather_text = f"Weather: {self.settings.weather_location} ({self.settings.air_density:.3f})"
-        self.draw_btn(weather_text, 360, 500, 280, 50, COLOR_PANEL)
+            btn_color = COLOR_PANEL
+            if self.weather_loading:
+                weather_text = f"Weather: {self.settings.weather_location} [LOADING...]"
+            else:
+                weather_text = f"Weather: {self.settings.weather_location} ({self.settings.air_density:.3f})"
+        self.draw_btn(weather_text, 360, 500, 280, 50, btn_color)
         self.draw_btn("Exit", 360, 565, 280, 50, COLOR_ACCENT)
 
     def draw_btn(self, text, x, y, w, h, color):
@@ -890,8 +910,15 @@ class app:
         
         lbl_title = self.font_gauge.render("ENVIRONMENT", True, COLOR_TEXT)
         lbl_planet = self.font_gauge.render(f"Planet: {self.settings.planet}", True, COLOR_WHITE)
-        lbl_weather = self.font_gauge.render(f"Weather: {self.settings.weather_location}", True, COLOR_WHITE)
-        lbl_density = self.font_gauge.render(f"Density: {self.settings.air_density:.3f}", True, COLOR_WHITE)
+        if self.settings.planet == "Mars":
+            lbl_weather = self.font_gauge.render("Weather: N/A (Mars)", True, COLOR_WHITE)
+            lbl_density = self.font_gauge.render("Density: 0.020", True, COLOR_WHITE)
+        elif self.settings.planet == "Moon":
+            lbl_weather = self.font_gauge.render("Weather: N/A (Vacuum)", True, COLOR_WHITE)
+            lbl_density = self.font_gauge.render("Density: 0.000", True, COLOR_WHITE)
+        else:
+            lbl_weather = self.font_gauge.render(f"Weather: {self.settings.weather_location}", True, COLOR_WHITE)
+            lbl_density = self.font_gauge.render(f"Density: {self.settings.air_density:.3f}", True, COLOR_WHITE)
         
         self.screen.blit(lbl_title, (840, 350))
         self.screen.blit(lbl_planet, (840, 370))
