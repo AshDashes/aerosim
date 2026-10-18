@@ -451,6 +451,33 @@ frameborder="1"
         }, 150);
     }
 
+    window.live_densities = {
+        'CYYZ': 1.208,
+        'KORD': 1.205,
+        'EGLL': 1.259
+    };
+
+    async function fetchLiveAirDensities() {
+        const coords = {
+            'CYYZ': [43.6777, -79.6248],
+            'KORD': [41.9742, -87.9073],
+            'EGLL': [51.4700, -0.4543]
+        };
+        for (const [icao, [lat, lon]] of Object.entries(coords)) {
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,surface_pressure`);
+                const data = await res.json();
+                const tempC = data.current.temperature_2m;
+                const pressPa = data.current.surface_pressure * 100.0;
+                const tempK = tempC + 273.15;
+                const rho = pressPa / (287.05 * tempK);
+                window.live_densities[icao] = rho;
+                console.log("Updated live density for " + icao + ": " + rho.toFixed(4));
+            } catch(e) {}
+        }
+    }
+    fetchLiveAirDensities();
+
     </script>
 
 </body>
